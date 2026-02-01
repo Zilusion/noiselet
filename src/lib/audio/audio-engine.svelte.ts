@@ -1,10 +1,11 @@
-// src\lib\audio\audio-engine.ts
+// src\lib\audio\audio-engine.svelte.ts
 const DEFAULT_MASTER_VOLUME = 1;
 
 export class AudioEngine {
 	private static _instance: AudioEngine | null = null;
 	private _ctx: AudioContext | null = null;
 	private _master: GainNode | null = null;
+	private _masterVolume = $state(DEFAULT_MASTER_VOLUME);
 
 	private constructor() {}
 
@@ -23,7 +24,7 @@ export class AudioEngine {
 		if (!this._ctx) {
 			this._ctx = new AudioContext();
 			this._master = this.context.createGain();
-			this._master.gain.value = DEFAULT_MASTER_VOLUME;
+			this._master.gain.value = this._masterVolume;
 			this._master.connect(this.context.destination);
 		}
 
@@ -72,11 +73,13 @@ export class AudioEngine {
 	}
 
 	get masterVolume(): number {
-		return this._master?.gain.value ?? DEFAULT_MASTER_VOLUME;
+		return this._masterVolume;
 	}
 
-	setMasterVolume(volume: number) {
-		if (!this._master) return;
-		this._master.gain.value = volume;
+	set masterVolume(volume: number) {
+		this._masterVolume = volume;
+		if (this._master) {
+			this._master.gain.value = volume;
+		}
 	}
 }
