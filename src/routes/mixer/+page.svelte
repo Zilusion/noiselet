@@ -16,6 +16,7 @@
 		try {
 			const url = getSoundUrl('rain');
 			buffer = await engine.loadBuffer(url);
+			engine.createChannel('rain', { initialVolume: 1 });
 		} catch (e) {
 			error = e instanceof Error ? e.message : String(e);
 		} finally {
@@ -39,6 +40,6 @@
 			step={0.01}
 			aria-valuetext={String(engine.masterVolume)}
 		></Slider>
-		<SoundCard {engine} {buffer} label="rain" />
+		<SoundCard {engine} {buffer} label="rain" channelId="rain" />
 	</section>
 {/if}

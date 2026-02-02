@@ -9,14 +9,17 @@
 		engine: AudioEngine;
 		buffer: AudioBuffer | null;
 		label?: string;
+		channelId: string;
 	};
 
-	let { engine, buffer, label }: Props = $props();
+	let { engine, buffer, label, channelId }: Props = $props();
+
+	let channel = $derived(engine.getChannel(channelId));
 
 	async function handlePlayClick() {
 		if (!buffer) return;
 		await engine.ensureRunning();
-		engine.playBuffer(buffer);
+		engine.playBuffer(buffer, { channelId });
 	}
 </script>
 
@@ -29,12 +32,12 @@
 				<div class="grid gap-2">
 					<Label for="email">Volume</Label>
 					<Slider
-						value={1}
+						bind:value={channel.volume}
 						type="single"
 						min={0}
 						max={2}
 						step={0.01}
-						aria-valuetext={String(engine.masterVolume)}
+						aria-valuetext={String(channel.volume)}
 					></Slider>
 				</div>
 			</div>
