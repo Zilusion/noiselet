@@ -3,10 +3,12 @@
 	import { AudioEngine } from '$lib/audio/audio-engine.svelte';
 	import { getSoundUrl } from '$lib/audio/sounds';
 	import { onMount } from 'svelte';
+	import SoundCard from './sound-card.svelte';
+	import { Slider } from '$lib/components/ui/slider';
 
 	const engine = AudioEngine.instance;
 
-	let buffer: AudioBuffer | null = null;
+	let buffer: AudioBuffer | null = $state(null);
 	let isLoading = $state(true);
 	let error: string | null = $state(null);
 
@@ -20,12 +22,6 @@
 			isLoading = false;
 		}
 	});
-
-	async function handlePlayClick() {
-		if (!buffer) return;
-		await engine.ensureRunning();
-		engine.playBuffer(buffer);
-	}
 </script>
 
 {#if error}
@@ -33,15 +29,16 @@
 {:else if isLoading}
 	Loading...
 {:else}
-	<button onclick={handlePlayClick}>Play rain sound</button>
-	<input
-		bind:value={engine.masterVolume}
-		type="range"
-		name="master"
-		id="master"
-		min="0"
-		max="2"
-		step="0.01"
-		aria-valuetext={String(engine.masterVolume)}
-	/>
+	<section class="flex flex-col gap-4 p-4">
+		<h1 class="text-2xl font-bold">Mixer</h1>
+		<Slider
+			type="single"
+			bind:value={engine.masterVolume}
+			min={0}
+			max={2}
+			step={0.01}
+			aria-valuetext={String(engine.masterVolume)}
+		></Slider>
+		<SoundCard {engine} {buffer} label="rain" />
+	</section>
 {/if}
