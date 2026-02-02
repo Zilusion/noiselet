@@ -1,3 +1,16 @@
+## [0.0.2](https://github.com/Zilusion/Noiselet/compare/v0.0.1...v0.0.2) (2026-02-02)
+
+### Bug Fixes
+
+- allow Vite to bind to all interfaces in Docker ([a7b3a70](https://github.com/Zilusion/Noiselet/commit/a7b3a70a45c2d1d49a592f8a2126a0e78db14c75))
+
+### Features
+
+- add basic audio engine logic ([8970bd3](https://github.com/Zilusion/Noiselet/commit/8970bd3df9ff4ecf0b564814336a56d07f4ad7c9))
+- add basic sound assets ([fd4586b](https://github.com/Zilusion/Noiselet/commit/fd4586bb706a7e437dd4f1de8d546e1f64582742))
+- add basic Web Audio API test page ([42bcf75](https://github.com/Zilusion/Noiselet/commit/42bcf755707c547a924ad9b01954c4d553e0e46c))
+- implement master volume logic ([ea1a295](https://github.com/Zilusion/Noiselet/commit/ea1a295e69f6e0e75cc7a05e11109b4c061791b3))
+
 ## 0.0.1 (2026-01-18)
 
 ### Bug Fixes
