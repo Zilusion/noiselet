@@ -1,7 +1,7 @@
 services:
   app-production:
-    image: ghcr.io/zilusion/ambionity:latest
-    container_name: ambionity-production
+    image: ghcr.io/zilusion/noiselet:latest
+    container_name: noiselet-production
     restart: always
     ports:
       - '127.0.0.1:${PORT_PROD}:3000'
@@ -15,8 +15,8 @@ services:
       - sqlite_data_prod:/app/.data
 
   app-edge:
-    image: ghcr.io/zilusion/ambionity:edge
-    container_name: ambionity-edge
+    image: ghcr.io/zilusion/noiselet:edge
+    container_name: noiselet-edge
     restart: always
     ports:
       - '127.0.0.1:${PORT_EDGE}:3000'

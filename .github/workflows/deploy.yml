@@ -117,7 +117,7 @@ jobs:
           username: ${{ secrets.VDS_USERNAME }}
           key: ${{ secrets.VDS_KEY }}
           script: |
-            cd /opt/ambionity
+            cd /opt/noiselet
 
             curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
                  -H "Accept: application/vnd.github.v3.raw" \

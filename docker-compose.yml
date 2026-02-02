@@ -4,7 +4,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.development
-    container_name: ambionity-development
+    container_name: noiselet-development
     restart: always
     ports:
       - '5173:5173'
@@ -37,7 +37,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.production
-    container_name: ambionity-production
+    container_name: noiselet-production
     restart: always
     ports:
       - '3000:3000'

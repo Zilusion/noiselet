@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Ambionity is a SvelteKit 2 + Svelte 5 full-stack web application with session-based authentication and internationalization. Uses TypeScript strict mode, Drizzle ORM with SQLite, and Tailwind CSS v4.
+Noiselet is a SvelteKit 2 + Svelte 5 full-stack web application with session-based authentication and internationalization. Uses TypeScript strict mode, Drizzle ORM with SQLite, and Tailwind CSS v4.
 
 ## Commands
 
@@ -67,7 +67,7 @@ docker compose -f docker-compose.production.yml up
 **Files:**
 
 - `docker-compose.yml` — local development and build
-- `docker-compose.production.yml` — deployment with images from `ghcr.io/zilusion/ambionity`
+- `docker-compose.production.yml` — deployment with images from `ghcr.io/zilusion/noiselet`
 
 ### Other
 
