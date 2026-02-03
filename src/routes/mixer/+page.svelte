@@ -1,22 +1,18 @@
 <!-- src\routes\mixer\+page.svelte -->
 <script lang="ts">
-	import { AudioEngine } from '$lib/audio/audio-engine.svelte';
-	import { getSoundUrl } from '$lib/audio/sounds';
+	import { getSoundConfigs } from '$lib/audio/sounds';
 	import { onMount } from 'svelte';
 	import SoundCard from './sound-card.svelte';
 	import { Slider } from '$lib/components/ui/slider';
+	import { Label } from '$lib/components/ui/label';
+	import { mixer } from '$lib/audio/mixer.svelte';
 
-	const engine = AudioEngine.instance;
-
-	let buffer: AudioBuffer | null = $state(null);
 	let isLoading = $state(true);
 	let error: string | null = $state(null);
 
 	onMount(async () => {
 		try {
-			const url = getSoundUrl('rain');
-			buffer = await engine.loadBuffer(url);
-			engine.createChannel('rain', { initialVolume: 1 });
+			await mixer.init(getSoundConfigs());
 		} catch (e) {
 			error = e instanceof Error ? e.message : String(e);
 		} finally {
@@ -32,14 +28,22 @@
 {:else}
 	<section class="flex flex-col gap-4 p-4">
 		<h1 class="text-2xl font-bold">Mixer</h1>
-		<Slider
-			type="single"
-			bind:value={engine.masterVolume}
-			min={0}
-			max={2}
-			step={0.01}
-			aria-valuetext={String(engine.masterVolume)}
-		></Slider>
-		<SoundCard {engine} {buffer} label="rain" channelId="rain" />
+		<div class="grid gap-2">
+			<Label>Master Volume</Label>
+			<Slider
+				type="single"
+				value={mixer.masterVolume}
+				onValueChange={(v) => (mixer.masterVolume = v)}
+				min={0}
+				max={2}
+				step={0.01}
+				aria-valuetext={String(mixer.masterVolume)}
+			></Slider>
+		</div>
+		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+			{#each mixer.sounds as sound (sound.id)}
+				<SoundCard {sound} />
+			{/each}
+		</div>
 	</section>
 {/if}
