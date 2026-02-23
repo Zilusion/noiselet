@@ -3,9 +3,18 @@ import { Sound, type SoundConfig } from './sound.svelte';
 export class Mixer {
 	private _context: AudioContext | null = null;
 	private _master: GainNode | null = null;
+	private _isPaused: boolean = $state(false);
 	private _masterVolume: number = $state(1);
 	private _sounds: Sound[] = $state([]);
 	private _isInitialized: boolean = $state(false);
+
+	get isPaused() {
+		return this._isPaused;
+	}
+
+	get hasActiveSounds(): boolean {
+		return this._sounds.some((sound) => sound.isPlaying);
+	}
 
 	get masterVolume() {
 		return this._masterVolume;
@@ -69,6 +78,7 @@ export class Mixer {
 		const { context } = this.ensureContext();
 		if (context.state === 'suspended') {
 			await context.resume();
+			this._isPaused = false;
 		}
 	}
 
@@ -76,6 +86,17 @@ export class Mixer {
 		this._sounds = configs.map((config) => new Sound(this, config));
 		await Promise.all(this._sounds.map((sound) => sound.load()));
 		this._isInitialized = true;
+	}
+
+	public async togglePause() {
+		const { context } = this.ensureContext();
+		if (context.state === 'running') {
+			await context.suspend();
+			this._isPaused = true;
+		} else if (context.state === 'suspended') {
+			await context.resume();
+			this._isPaused = false;
+		}
 	}
 }
 

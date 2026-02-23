@@ -6,6 +6,8 @@
 	import { Slider } from '$lib/components/ui/slider';
 	import { Label } from '$lib/components/ui/label';
 	import { mixer } from '$lib/audio/mixer.svelte';
+	import { Button } from '$lib/components/ui/button';
+	import { sleepTimer } from '$lib/audio/sleep-timer.svelte';
 
 	let isLoading = $state(true);
 	let error: string | null = $state(null);
@@ -18,6 +20,8 @@
 		} finally {
 			isLoading = false;
 		}
+
+		sleepTimer.start(20);
 	});
 </script>
 
@@ -29,6 +33,13 @@
 	<section class="flex flex-col gap-4 p-4">
 		<h1 class="text-2xl font-bold">Mixer</h1>
 		<div class="grid gap-2">
+			{#if mixer.hasActiveSounds || mixer.isPaused}
+				<Button
+					onclick={() => {
+						mixer.togglePause();
+					}}>{mixer.isPaused ? 'Resume' : 'Pause'}</Button
+				>
+			{/if}
 			<Label>Master Volume</Label>
 			<Slider
 				type="single"

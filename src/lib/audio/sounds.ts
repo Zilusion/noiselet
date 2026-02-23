@@ -18,13 +18,16 @@ export function getSoundUrl(soundName: string): string {
 	return loader;
 }
 
+const DISABLED_SOUNDS: string[] = ['handpan'];
+
 function getAvailableSoundIds(): string[] {
 	return Object.keys(soundFiles)
 		.map((path) => {
 			const match = path.match(/\/([^/]+)\.mp3$/);
 			return match?.[1];
 		})
-		.filter((id): id is string => Boolean(id));
+		.filter((id): id is string => Boolean(id))
+		.filter((id) => !DISABLED_SOUNDS.includes(id));
 }
 
 const SOUND_LABELS: Record<string, string> = {
