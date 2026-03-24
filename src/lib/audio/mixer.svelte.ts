@@ -78,22 +78,30 @@ export class Mixer {
 		const { context } = this.ensureContext();
 		if (context.state === 'suspended') {
 			await context.resume();
-			this._isPaused = false;
 		}
 	}
 
 	public async init(configs: SoundConfig[]): Promise<void> {
+		if (this._isInitialized) {
+			return;
+		}
 		this._sounds = configs.map((config) => new Sound(this, config));
 		await Promise.all(this._sounds.map((sound) => sound.load()));
 		this._isInitialized = true;
 	}
 
-	public async togglePause() {
+	public async pause() {
 		const { context } = this.ensureContext();
 		if (context.state === 'running') {
 			await context.suspend();
 			this._isPaused = true;
-		} else if (context.state === 'suspended') {
+		}
+	}
+
+	public async resume() {
+		const { context } = this.ensureContext();
+
+		if (context.state === 'suspended') {
 			await context.resume();
 			this._isPaused = false;
 		}

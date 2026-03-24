@@ -7,7 +7,7 @@
 	import { Label } from '$lib/components/ui/label';
 	import { mixer } from '$lib/audio/mixer.svelte';
 	import { Button } from '$lib/components/ui/button';
-	import { sleepTimer } from '$lib/audio/sleep-timer.svelte';
+	import { SleepTimer } from '$lib/audio/sleep-timer.svelte';
 
 	let isLoading = $state(true);
 	let error: string | null = $state(null);
@@ -20,9 +20,23 @@
 		} finally {
 			isLoading = false;
 		}
-
-		sleepTimer.start(20);
 	});
+
+	function onTimerComplete() {
+		mixer.pause();
+	}
+
+	let sleepTimer = new SleepTimer(onTimerComplete);
+
+	function startSleepTimer() {
+		if (!mixer.hasActiveSounds) return;
+
+		sleepTimer.start(10);
+	}
+
+	function cancelSleepTimer() {
+		sleepTimer.cancel();
+	}
 </script>
 
 {#if error}
@@ -36,7 +50,11 @@
 			{#if mixer.hasActiveSounds || mixer.isPaused}
 				<Button
 					onclick={() => {
-						mixer.togglePause();
+						if (mixer.isPaused) {
+							mixer.resume();
+						} else {
+							mixer.pause();
+						}
 					}}>{mixer.isPaused ? 'Resume' : 'Pause'}</Button
 				>
 			{/if}
@@ -50,6 +68,15 @@
 				step={0.01}
 				aria-valuetext={String(mixer.masterVolume)}
 			></Slider>
+			<div class="flex gap-2">
+				<Button variant="outline" class="w-40" onclick={startSleepTimer}>
+					Sleep in 10 seconds
+				</Button>
+				<Button variant="outline" class="w-40" onclick={cancelSleepTimer}>
+					Cancel sleep timer
+				</Button>
+				<p>Sleep timer: {sleepTimer.remainingSeconds}s left</p>
+			</div>
 		</div>
 		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 			{#each mixer.sounds as sound (sound.id)}
