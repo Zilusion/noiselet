@@ -74,13 +74,6 @@ export class Mixer {
 		return context.decodeAudioData(arrayBuffer);
 	}
 
-	public async ensureRunning() {
-		const { context } = this.ensureContext();
-		if (context.state === 'suspended') {
-			await context.resume();
-		}
-	}
-
 	public async init(configs: SoundConfig[]): Promise<void> {
 		if (this._isInitialized) {
 			return;
@@ -94,8 +87,8 @@ export class Mixer {
 		const { context } = this.ensureContext();
 		if (context.state === 'running') {
 			await context.suspend();
-			this._isPaused = true;
 		}
+		this._isPaused = true;
 	}
 
 	public async resume() {
@@ -103,8 +96,8 @@ export class Mixer {
 
 		if (context.state === 'suspended') {
 			await context.resume();
-			this._isPaused = false;
 		}
+		this._isPaused = false;
 	}
 }
 

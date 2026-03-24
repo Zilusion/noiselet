@@ -22,6 +22,14 @@
 		}
 	});
 
+	function toggleMixerPause() {
+		if (mixer.isPaused) {
+			mixer.resume();
+		} else {
+			mixer.pause();
+		}
+	}
+
 	function onTimerComplete() {
 		mixer.pause();
 	}
@@ -29,7 +37,7 @@
 	let sleepTimer = new SleepTimer(onTimerComplete);
 
 	function startSleepTimer() {
-		if (!mixer.hasActiveSounds) return;
+		if (!canStartSleepTimer) return;
 
 		sleepTimer.start(10);
 	}
@@ -37,6 +45,17 @@
 	function cancelSleepTimer() {
 		sleepTimer.cancel();
 	}
+
+	const canStartSleepTimer = $derived(mixer.hasActiveSounds && !mixer.isPaused);
+
+	const shouldCancelSleepTimer = $derived(
+		sleepTimer.isRunning && (mixer.isPaused || !mixer.hasActiveSounds)
+	);
+
+	$effect(() => {
+		if (!shouldCancelSleepTimer) return;
+		sleepTimer.cancel();
+	});
 </script>
 
 {#if error}
@@ -48,15 +67,7 @@
 		<h1 class="text-2xl font-bold">Mixer</h1>
 		<div class="grid gap-2">
 			{#if mixer.hasActiveSounds || mixer.isPaused}
-				<Button
-					onclick={() => {
-						if (mixer.isPaused) {
-							mixer.resume();
-						} else {
-							mixer.pause();
-						}
-					}}>{mixer.isPaused ? 'Resume' : 'Pause'}</Button
-				>
+				<Button onclick={toggleMixerPause}>{mixer.isPaused ? 'Resume' : 'Pause'}</Button>
 			{/if}
 			<Label>Master Volume</Label>
 			<Slider
@@ -69,13 +80,20 @@
 				aria-valuetext={String(mixer.masterVolume)}
 			></Slider>
 			<div class="flex gap-2">
-				<Button variant="outline" class="w-40" onclick={startSleepTimer}>
-					Sleep in 10 seconds
+				<Button
+					variant="outline"
+					class="w-40"
+					onclick={startSleepTimer}
+					disabled={!canStartSleepTimer}
+				>
+					{sleepTimer.isRunning ? 'Reset sleep timer' : 'Sleep in 10 seconds'}
 				</Button>
-				<Button variant="outline" class="w-40" onclick={cancelSleepTimer}>
-					Cancel sleep timer
-				</Button>
-				<p>Sleep timer: {sleepTimer.remainingSeconds}s left</p>
+				{#if sleepTimer.isRunning}
+					<Button variant="outline" class="w-40" onclick={cancelSleepTimer}>
+						Cancel sleep timer
+					</Button>
+					<p>Sleep timer: {sleepTimer.remainingSeconds}s left</p>
+				{/if}
 			</div>
 		</div>
 		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

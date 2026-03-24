@@ -79,12 +79,4 @@ export class Sound {
 		this.source = null;
 		this._isPlaying = false;
 	}
-
-	public toggle(): void {
-		if (this._isPlaying) {
-			this.stop();
-		} else {
-			this.play();
-		}
-	}
 }

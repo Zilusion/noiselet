@@ -14,8 +14,13 @@
 	let { sound }: Props = $props();
 
 	async function handleToggle() {
-		await mixer.ensureRunning();
-		sound.toggle();
+		if (sound.isPlaying) {
+			sound.stop();
+			return;
+		}
+
+		await mixer.resume();
+		sound.play();
 	}
 </script>
 
