@@ -1,4 +1,4 @@
-import { mixer, type Mixer } from './mixer.svelte';
+import { type Mixer } from './mixer.svelte';
 
 export type SoundConfig = {
 	id: string;
@@ -47,7 +47,7 @@ export class Sound {
 	}
 
 	async load() {
-		this.buffer = await mixer.loadBuffer(this.url);
+		this.buffer = await this.mixer.loadBuffer(this.url);
 		this._isLoaded = true;
 	}
 

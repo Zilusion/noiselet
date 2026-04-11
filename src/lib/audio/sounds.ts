@@ -1,4 +1,3 @@
-// src\lib\audio\sounds.ts
 import type { SoundConfig } from './sound.svelte';
 
 export const soundFiles: Record<string, string> = import.meta.glob('$lib/assets/sounds/*.mp3', {

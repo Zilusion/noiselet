@@ -1,7 +1,6 @@
-<!-- src\routes\mixer\+page.svelte -->
 <script lang="ts">
 	import { getSoundConfigs } from '$lib/audio/sounds';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import SoundCard from './sound-card.svelte';
 	import { Slider } from '$lib/components/ui/slider';
 	import { Label } from '$lib/components/ui/label';
@@ -20,6 +19,10 @@
 		} finally {
 			isLoading = false;
 		}
+	});
+
+	onDestroy(() => {
+		sleepTimer.cancel();
 	});
 
 	function toggleMixerPause() {
