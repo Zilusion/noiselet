@@ -18,8 +18,8 @@
 			return;
 		}
 
-		await mixer.resume();
 		try {
+			await mixer.resume();
 			await sound.play();
 		} catch {
 			// Error state is already stored in sound.error.

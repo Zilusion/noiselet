@@ -17,11 +17,11 @@
 		mixer.stopAll();
 	});
 
-	function toggleMixerPause() {
+	async function toggleMixerPause() {
 		if (mixer.isPaused) {
-			mixer.resume();
+			await mixer.resume();
 		} else {
-			mixer.pause();
+			await mixer.pause();
 		}
 	}
 
