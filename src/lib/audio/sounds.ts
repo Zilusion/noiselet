@@ -17,7 +17,7 @@ export function getSoundUrl(soundName: string): string {
 	return loader;
 }
 
-const DISABLED_SOUNDS: string[] = ['handpan'];
+const DISABLED_SOUNDS: string[] = [];
 
 function getAvailableSoundIds(): string[] {
 	return Object.keys(soundFiles)

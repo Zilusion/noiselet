@@ -12,9 +12,11 @@ export class Sound {
 	public readonly url: string;
 
 	private _volume: number = $state(1);
+	private _isStarting: boolean = $state(false);
 	private _isPlaying: boolean = $state(false);
 	private _isLoaded: boolean = $state(false);
 	private _isLoading: boolean = $state(false);
+	private _loadPromise: Promise<void> | null = null;
 
 	private buffer: AudioBuffer | null = null;
 	private gain: GainNode;
@@ -39,6 +41,10 @@ export class Sound {
 		this.gain.gain.value = volume;
 	}
 
+	get isStarting() {
+		return this._isStarting;
+	}
+
 	get isPlaying() {
 		return this._isPlaying;
 	}
@@ -52,37 +58,53 @@ export class Sound {
 	}
 
 	async load() {
-		if (this._isLoading) return;
-		this._isLoading = true;
-		this.buffer = await this.mixer.loadBuffer(this.url);
-		this._isLoading = false;
-		this._isLoaded = true;
+		if (this._isLoaded) return;
+		if (this._loadPromise) return this._loadPromise;
+
+		this._loadPromise = (async () => {
+			this._isLoading = true;
+			try {
+				this.buffer = await this.mixer.loadBuffer(this.url);
+			} finally {
+				this._isLoading = false;
+				this._loadPromise = null;
+			}
+			this._isLoaded = true;
+		})();
+		return this._loadPromise;
 	}
 
 	public async play(): Promise<void> {
 		if (this._isPlaying) return;
+		if (this._isStarting) return;
 
-		if (!this._isLoaded) {
-			await this.load();
-		}
+		this._isStarting = true;
 
-		if (!this.buffer) return;
-
-		const context = this.mixer.audioContext;
-		this.source = new AudioBufferSourceNode(context, {
-			buffer: this.buffer,
-			loop: true
-		});
-		this.source.connect(this.gain);
-		this.source.start();
-		this._isPlaying = true;
-
-		this.source.onended = () => {
-			if (this._isPlaying) {
-				this._isPlaying = false;
-				this.source = null;
+		try {
+			if (!this._isLoaded) {
+				await this.load();
 			}
-		};
+
+			if (!this.buffer) return;
+
+			const context = this.mixer.audioContext;
+			this.source = new AudioBufferSourceNode(context, {
+				buffer: this.buffer,
+				loop: true
+			});
+			this.source.connect(this.gain);
+			this.source.start();
+			this._isPlaying = true;
+
+			this.source.onended = () => {
+				if (this._isPlaying) {
+					this._isPlaying = false;
+					this.source = null;
+				}
+			};
+		} finally {
+			this._isStarting = false;
+		}
 	}
 
 	public stop(): void {

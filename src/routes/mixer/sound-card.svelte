@@ -1,4 +1,3 @@
-<!-- src\routes\mixer\sound-card.svelte -->
 <script lang="ts">
 	import { mixer } from '$lib/audio/mixer.svelte';
 	import type { Sound } from '$lib/audio/sound.svelte';
@@ -47,8 +46,18 @@
 		</form>
 	</Card.Content>
 	<Card.Footer class="flex-col gap-2">
-		<Button variant={sound.isPlaying ? 'default' : 'outline'} onclick={handleToggle}>
-			{!sound.isLoaded ? 'Load sound' : sound.isPlaying ? 'Stop' : 'Play'}
+		<Button
+			variant={sound.isPlaying ? 'default' : 'outline'}
+			onclick={handleToggle}
+			disabled={sound.isLoading}
+		>
+			{sound.isLoading
+				? 'Loading...'
+				: !sound.isLoaded
+					? 'Load sound'
+					: sound.isPlaying
+						? 'Stop'
+						: 'Play'}
 		</Button>
 	</Card.Footer>
 </Card.Root>
