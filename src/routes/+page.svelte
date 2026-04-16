@@ -1,64 +1,93 @@
 <script lang="ts">
-	import campfireSound from '$lib/assets/sounds/campfire.mp3';
-	import { onMount } from 'svelte';
-
-	let audioElement: HTMLAudioElement;
-	let audioContext: AudioContext | null = null;
-	let gainNode: GainNode | null = null;
-	let panNode: StereoPannerNode | null = null;
-	const panOptions: StereoPannerOptions = { pan: 0 };
-
-	let isPlaying = $state(false);
-	let volume: number = $state(1);
-	let pan: number = $state(0);
+	import { getSoundConfigs } from '$lib/audio/sounds';
+	import { onDestroy, onMount } from 'svelte';
+	import { Slider } from '$lib/components/ui/slider';
+	import { Label } from '$lib/components/ui/label';
+	import { mixer } from '$lib/audio/mixer.svelte';
+	import { Button } from '$lib/components/ui/button';
+	import { SleepTimer } from '$lib/audio/sleep-timer.svelte';
+	import SoundCard from './sound-card.svelte';
 
 	onMount(() => {
-		audioContext = new AudioContext();
-		const track = audioContext.createMediaElementSource(audioElement);
-		gainNode = new GainNode(audioContext);
-		panNode = new StereoPannerNode(audioContext, panOptions);
-		track.connect(gainNode).connect(panNode).connect(audioContext.destination);
-
-		return () => {
-			audioContext?.close();
-		};
+		mixer.init(getSoundConfigs());
 	});
 
-	function handleClick() {
-		if (!audioContext) return;
-		if (audioContext.state === 'suspended') {
-			audioContext.resume();
-		}
+	onDestroy(() => {
+		sleepTimer.cancel();
+	});
 
-		if (!isPlaying) {
-			audioElement.play();
-			isPlaying = true;
+	function toggleMixerPause() {
+		if (mixer.isPaused) {
+			mixer.resume();
 		} else {
-			audioElement.pause();
-			isPlaying = false;
+			mixer.pause();
 		}
 	}
 
-	function handleEnded() {
-		isPlaying = false;
+	function onTimerComplete() {
+		mixer.pause();
 	}
 
-	$effect(() => {
-		if (!gainNode) return;
-		gainNode.gain.value = volume;
-	});
+	let sleepTimer = new SleepTimer(onTimerComplete);
+
+	function startSleepTimer() {
+		if (!canStartSleepTimer) return;
+
+		sleepTimer.start(10);
+	}
+
+	function cancelSleepTimer() {
+		sleepTimer.cancel();
+	}
+
+	const canStartSleepTimer = $derived(mixer.hasActiveSounds && !mixer.isPaused);
+
+	const shouldCancelSleepTimer = $derived(
+		sleepTimer.isRunning && (mixer.isPaused || !mixer.hasActiveSounds)
+	);
 
 	$effect(() => {
-		if (!panNode) return;
-		panNode.pan.value = pan;
+		if (!shouldCancelSleepTimer) return;
+		sleepTimer.cancel();
 	});
 </script>
 
-<audio bind:this={audioElement} src={campfireSound} onended={handleEnded}></audio>
-<button onclick={handleClick} data-playing={isPlaying} role="switch" aria-checked={isPlaying}>
-	<span>{isPlaying ? 'Pause' : 'Play'}</span>
-</button>
-<input bind:value={volume} type="range" name="volume" id="volume" min="0" max="2" step="0.01" />
-<input bind:value={pan} type="range" name="pan" id="pan" min="-1" max="1" step="0.01" />
-<p>{volume}</p>
-<p>{pan}</p>
+<section class="flex flex-col gap-4 p-4">
+	<h1 class="text-2xl font-bold">Mixer</h1>
+	<div class="grid gap-2">
+		{#if mixer.hasActiveSounds || mixer.isPaused}
+			<Button onclick={toggleMixerPause}>{mixer.isPaused ? 'Resume' : 'Pause'}</Button>
+		{/if}
+		<Label>Master Volume</Label>
+		<Slider
+			type="single"
+			value={mixer.masterVolume}
+			onValueChange={(v) => (mixer.masterVolume = v)}
+			min={0}
+			max={2}
+			step={0.01}
+			aria-valuetext={String(mixer.masterVolume)}
+		></Slider>
+		<div class="flex gap-2">
+			<Button
+				variant="outline"
+				class="w-40"
+				onclick={startSleepTimer}
+				disabled={!canStartSleepTimer}
+			>
+				{sleepTimer.isRunning ? 'Reset sleep timer' : 'Sleep in 10 seconds'}
+			</Button>
+			{#if sleepTimer.isRunning}
+				<Button variant="outline" class="w-40" onclick={cancelSleepTimer}>
+					Cancel sleep timer
+				</Button>
+				<p>Sleep timer: {sleepTimer.remainingSeconds}s left</p>
+			{/if}
+		</div>
+	</div>
+	<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+		{#each mixer.sounds as sound (sound.id)}
+			<SoundCard {sound} />
+		{/each}
+	</div>
+</section>
