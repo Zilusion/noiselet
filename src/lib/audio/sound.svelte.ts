@@ -19,7 +19,7 @@ export class Sound {
 	private _loadPromise: Promise<void> | null = null;
 
 	private buffer: AudioBuffer | null = null;
-	private gain: GainNode;
+	private gain: GainNode | null = null;
 	private source: AudioBufferSourceNode | null = null;
 
 	public constructor(
@@ -29,7 +29,6 @@ export class Sound {
 		this.id = config.id;
 		this.label = config.label;
 		this.url = config.url;
-		this.gain = mixer.createGain();
 	}
 
 	get volume() {
@@ -38,7 +37,9 @@ export class Sound {
 
 	set volume(volume) {
 		this._volume = volume;
-		this.gain.gain.value = volume;
+		if (this.gain) {
+			this.gain.gain.value = volume;
+		}
 	}
 
 	get isStarting() {
@@ -92,6 +93,10 @@ export class Sound {
 				buffer: this.buffer,
 				loop: true
 			});
+			if (!this.gain) {
+				this.gain = this.mixer.createGain();
+				this.gain.gain.value = this.volume;
+			}
 			this.source.connect(this.gain);
 			this.source.start();
 			this._isPlaying = true;
