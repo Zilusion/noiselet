@@ -74,12 +74,11 @@ export class Mixer {
 		return context.decodeAudioData(arrayBuffer);
 	}
 
-	public async init(configs: SoundConfig[]): Promise<void> {
+	public init(configs: SoundConfig[]): void {
 		if (this._isInitialized) {
 			return;
 		}
 		this._sounds = configs.map((config) => new Sound(this, config));
-		await Promise.all(this._sounds.map((sound) => sound.load()));
 		this._isInitialized = true;
 	}
 

@@ -20,7 +20,7 @@
 		}
 
 		await mixer.resume();
-		sound.play();
+		await sound.play();
 	}
 </script>
 
@@ -47,12 +47,8 @@
 		</form>
 	</Card.Content>
 	<Card.Footer class="flex-col gap-2">
-		<Button
-			variant={sound.isPlaying ? 'default' : 'outline'}
-			onclick={handleToggle}
-			disabled={!sound.isLoaded}
-		>
-			{sound.isPlaying ? 'Stop' : 'Play'}
+		<Button variant={sound.isPlaying ? 'default' : 'outline'} onclick={handleToggle}>
+			{!sound.isLoaded ? 'Load sound' : sound.isPlaying ? 'Stop' : 'Play'}
 		</Button>
 	</Card.Footer>
 </Card.Root>
