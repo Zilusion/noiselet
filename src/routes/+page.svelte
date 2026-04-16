@@ -9,11 +9,12 @@
 	import SoundCard from './sound-card.svelte';
 
 	onMount(() => {
-		mixer.init(getSoundConfigs());
+		mixer.initialize(getSoundConfigs());
 	});
 
 	onDestroy(() => {
 		sleepTimer.cancel();
+		mixer.stopAll();
 	});
 
 	function toggleMixerPause() {

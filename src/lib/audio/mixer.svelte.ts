@@ -74,7 +74,7 @@ export class Mixer {
 		return context.decodeAudioData(arrayBuffer);
 	}
 
-	public init(configs: SoundConfig[]): void {
+	public initialize(configs: SoundConfig[]): void {
 		if (this._isInitialized) {
 			return;
 		}
@@ -97,6 +97,12 @@ export class Mixer {
 			await context.resume();
 		}
 		this._isPaused = false;
+	}
+
+	public stopAll() {
+		this._sounds.forEach((sound) => {
+			sound.stop();
+		});
 	}
 }
 
