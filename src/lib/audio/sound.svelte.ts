@@ -14,6 +14,7 @@ export class Sound {
 	private _volume: number = $state(1);
 	private _isPlaying: boolean = $state(false);
 	private _isLoaded: boolean = $state(false);
+	private _isLoading: boolean = $state(false);
 
 	private buffer: AudioBuffer | null = null;
 	private gain: GainNode;
@@ -46,13 +47,26 @@ export class Sound {
 		return this._isLoaded;
 	}
 
+	get isLoading() {
+		return this._isLoading;
+	}
+
 	async load() {
+		if (this._isLoading) return;
+		this._isLoading = true;
 		this.buffer = await this.mixer.loadBuffer(this.url);
+		this._isLoading = false;
 		this._isLoaded = true;
 	}
 
-	public play(): void {
-		if (this._isPlaying || !this.buffer) return;
+	public async play(): Promise<void> {
+		if (this._isPlaying) return;
+
+		if (!this._isLoaded) {
+			await this.load();
+		}
+
+		if (!this.buffer) return;
 
 		const context = this.mixer.audioContext;
 		this.source = new AudioBufferSourceNode(context, {
