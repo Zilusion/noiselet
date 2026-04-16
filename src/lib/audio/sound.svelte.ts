@@ -16,8 +16,9 @@ export class Sound {
 	private _isPlaying: boolean = $state(false);
 	private _isLoaded: boolean = $state(false);
 	private _isLoading: boolean = $state(false);
-	private _loadPromise: Promise<void> | null = null;
+	private _error: Error | null = $state(null);
 
+	private loadPromise: Promise<void> | null = null;
 	private buffer: AudioBuffer | null = null;
 	private gain: GainNode | null = null;
 	private source: AudioBufferSourceNode | null = null;
@@ -58,21 +59,29 @@ export class Sound {
 		return this._isLoading;
 	}
 
+	get error() {
+		return this._error;
+	}
+
 	async load() {
 		if (this._isLoaded) return;
-		if (this._loadPromise) return this._loadPromise;
+		if (this.loadPromise) return this.loadPromise;
+		this._error = null;
 
-		this._loadPromise = (async () => {
+		this.loadPromise = (async () => {
 			this._isLoading = true;
 			try {
 				this.buffer = await this.mixer.loadBuffer(this.url);
+				this._isLoaded = true;
+			} catch (error: unknown) {
+				this._error = error instanceof Error ? error : new Error(String(error));
+				throw this._error;
 			} finally {
 				this._isLoading = false;
-				this._loadPromise = null;
+				this.loadPromise = null;
 			}
-			this._isLoaded = true;
 		})();
-		return this._loadPromise;
+		return this.loadPromise;
 	}
 
 	public async play(): Promise<void> {

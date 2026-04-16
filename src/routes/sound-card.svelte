@@ -19,7 +19,11 @@
 		}
 
 		await mixer.resume();
-		await sound.play();
+		try {
+			await sound.play();
+		} catch {
+			// Error state is already stored in sound.error.
+		}
 	}
 </script>
 
@@ -59,5 +63,8 @@
 						? 'Stop'
 						: 'Play'}
 		</Button>
+		{#if sound.error}
+			<p class="text-red-500">{sound.error.message}</p>
+		{/if}
 	</Card.Footer>
 </Card.Root>
